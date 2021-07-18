@@ -29,6 +29,7 @@ public class RestApiRegistrar implements ImportBeanDefinitionRegistrar, Resource
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
 
         // TODO: 2021-07-16 11:16:48 字节码增强? by wangyongxu
+//        importingClassMetadata
 
     }
 }
