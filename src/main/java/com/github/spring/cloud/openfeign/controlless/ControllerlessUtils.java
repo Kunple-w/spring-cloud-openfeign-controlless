@@ -1,15 +1,24 @@
 package com.github.spring.cloud.openfeign.controlless;
 
 import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.description.ModifierReviewable;
 import net.bytebuddy.description.annotation.AnnotationDescription;
+import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.modifier.Visibility;
+import net.bytebuddy.description.type.TypeDefinition;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,7 +42,7 @@ public class ControllerlessUtils {
         AnnotationDescription requestMappingAnnotationDescription = AnnotationDescription
                 .Builder
                 .ofType(RequestMapping.class)
-                .define("name", classDescriptor.getClazzName())
+                .define("name", "/" + classDescriptor.getTargetClass().getSimpleName())
                 .build();
 
         DynamicType.Builder<?> builder = new ByteBuddy()
@@ -50,8 +59,21 @@ public class ControllerlessUtils {
 
     private static DynamicType.Builder<?> defineMethods(DynamicType.Builder<?> builder, ControllerClassDescriptor classDescriptor) {
         for (ControllerMethodDescriptor methodDescriptor : classDescriptor.getMethodDescriptors()) {
-            builder = builder.defineMethod(methodDescriptor.getMethodName(), methodDescriptor.getReturnType(), Visibility.PUBLIC)
-                    .withoutCode();
+            AnnotationDescription annotationDescription = AnnotationDescription
+                    .Builder
+                    .ofType(PostMapping.class)
+                    .define("name", "/" + methodDescriptor.getMethodName())
+                    .build();
+            DynamicType.Builder.MethodDefinition.ParameterDefinition.Initial<?> initial = builder.defineMethod(methodDescriptor.getMethodName(), methodDescriptor.getReturnType(), Visibility.PUBLIC);
+
+            for (Class<?> parameterType : methodDescriptor.getParameterTypes()) {
+                builder = initial.withParameter(parameterType).annotateParameter(AnnotationDescription
+                        .Builder
+                        .ofType(RequestBody.class)
+                        .build())
+                        .withoutCode()
+                        .annotateMethod(annotationDescription);
+            }
         }
         return builder;
     }

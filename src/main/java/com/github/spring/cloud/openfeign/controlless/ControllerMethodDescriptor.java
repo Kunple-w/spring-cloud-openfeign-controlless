@@ -16,7 +16,7 @@ public class ControllerMethodDescriptor {
     private Class<?> returnType;
 
 
-    private Object[] parameterTypes;
+    private Class[] parameterTypes;
 
     public ControllerClassDescriptor getClassDescriptor() {
         return classDescriptor;
@@ -42,9 +42,6 @@ public class ControllerMethodDescriptor {
         this.methodName = methodName;
     }
 
-    public Object[] getParameterTypes() {
-        return parameterTypes;
-    }
 
     public Class<?> getReturnType() {
         return returnType;
@@ -54,7 +51,11 @@ public class ControllerMethodDescriptor {
         this.returnType = returnType;
     }
 
-    public void setParameterTypes(Object[] parameterTypes) {
+    public Class[] getParameterTypes() {
+        return parameterTypes;
+    }
+
+    public void setParameterTypes(Class[] parameterTypes) {
         this.parameterTypes = parameterTypes;
     }
 }
