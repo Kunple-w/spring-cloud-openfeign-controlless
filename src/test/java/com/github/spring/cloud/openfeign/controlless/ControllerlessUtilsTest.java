@@ -24,7 +24,7 @@ class ControllerlessUtilsTest {
     @Test
     void createClassToFile() throws IOException {
         ControllerClassDescriptor classDescriptor = new ControllerDescriptorBuilder(UserService.class).build();
-        ControllerlessUtils.createClassToFile(classDescriptor,new File("./xxx/a"));
+        ControllerlessUtils.createClassToFile(classDescriptor,new File("./out"));
 
     }
 }

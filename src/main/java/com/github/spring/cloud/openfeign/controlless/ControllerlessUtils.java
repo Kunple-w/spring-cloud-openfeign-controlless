@@ -5,7 +5,6 @@ import net.bytebuddy.description.annotation.AnnotationDescription;
 import net.bytebuddy.description.modifier.Visibility;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.jar.asm.Opcodes;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,12 +38,9 @@ public class ControllerlessUtils {
 
         DynamicType.Builder<?> builder = new ByteBuddy()
                 .makeInterface()
-//                .subclass(Object.class)
-                .name(classDescriptor.getTargetClass().getSimpleName() + "Controller")
+                .name(classDescriptor.getTargetClass().getName() + "Controller")
                 .annotateType(restControllerAnnotationDescription, requestMappingAnnotationDescription);
-
-//        builder.annotateType(restControllerAnnotationDescription, requestMappingAnnotationDescription);
-        defineMethods(builder, classDescriptor);
+        builder = defineMethods(builder, classDescriptor);
         return builder.make();
     }
 
@@ -52,10 +48,12 @@ public class ControllerlessUtils {
         return createUnloaded(classDescriptor).saveIn(file);
     }
 
-    private static void defineMethods(DynamicType.Builder<?> builder, ControllerClassDescriptor classDescriptor) {
+    private static DynamicType.Builder<?> defineMethods(DynamicType.Builder<?> builder, ControllerClassDescriptor classDescriptor) {
         for (ControllerMethodDescriptor methodDescriptor : classDescriptor.getMethodDescriptors()) {
-            builder.defineMethod(methodDescriptor.getMethodName(), methodDescriptor.getReturnType(), Visibility.PUBLIC);
+            builder = builder.defineMethod(methodDescriptor.getMethodName(), methodDescriptor.getReturnType(), Visibility.PUBLIC)
+                    .withoutCode();
         }
+        return builder;
     }
 
 }
