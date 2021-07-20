@@ -1,13 +1,11 @@
 package com.github.spring.cloud.openfeign.controlless;
 
 import net.bytebuddy.ByteBuddy;
-import net.bytebuddy.description.ModifierReviewable;
 import net.bytebuddy.description.annotation.AnnotationDescription;
-import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.modifier.Visibility;
-import net.bytebuddy.description.type.TypeDefinition;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,10 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,10 +39,15 @@ public class ControllerlessUtils {
                 .define("name", "/" + classDescriptor.getTargetClass().getSimpleName())
                 .build();
 
+        AnnotationDescription feignClient = AnnotationDescription
+                .Builder
+                .ofType(FeignClient.class)
+                .build();
+
         DynamicType.Builder<?> builder = new ByteBuddy()
                 .makeInterface()
                 .name(classDescriptor.getTargetClass().getName() + "Controller")
-                .annotateType(restControllerAnnotationDescription, requestMappingAnnotationDescription);
+                .annotateType(restControllerAnnotationDescription, requestMappingAnnotationDescription, feignClient);
         builder = defineMethods(builder, classDescriptor);
         return builder.make();
     }
